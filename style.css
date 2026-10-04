@@ -1,0 +1,697 @@
+/* ==========================================================================
+   SELVAGANAPATHY R — PORTFOLIO 2026 · style.css
+   Scroll-driven video background edition.
+   00 Preloader · 01 Tokens · 02 Reset · 03 Utilities · 04 Grain · 05 Cursor · 06 Nav
+   07 Scene layer + scrim · 08 Progress meter · 09 Background toggle
+   10 Panels · 11 Work grid · 12 About · 13 Skills · 14 Reviews
+   15 Contact · 16 End · 17 Case overlay · 18 A11y · 19 Responsive
+   20 Reduced motion
+   ========================================================================== */
+
+/* 00 · PRELOADER ---------------------------------------------------------------- */
+/* Paints immediately and sits above everything (z-index 400, over the skip
+   link's 300) so there is never a flash of unstyled panel behind it.
+   `is-loading` on <html> is what actually locks the scrollbar. */
+html.is-loading, html.is-loading body { overflow: hidden; }
+
+#loader {
+  position: fixed; inset: 0; z-index: 400;
+  display: grid; grid-template-rows: 1fr auto auto; gap: clamp(1rem, 2.5vh, 1.75rem);
+  align-content: end;
+  padding: var(--gutter);
+  background: var(--ink);
+  color: var(--bone);
+  /* Wipe-up exit. `visibility` rides along with the transform so the panel
+     leaves the hit/a11y tree at the end of the wipe, not the instant the
+     class lands. */
+  transition: transform .8s var(--ease-out), opacity .5s ease, visibility .8s;
+}
+html.is-ready #loader { transform: translate3d(0, -101%, 0); opacity: 0; visibility: hidden; }
+
+.loader-inner { grid-row: 1; align-self: center; display: grid; gap: .5rem; }
+.loader-name {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(2.1rem, 8.5vw, 6.5rem); line-height: .92; letter-spacing: -.01em;
+}
+.loader-role {
+  font-family: var(--font-mono); font-size: .62rem; font-weight: 500;
+  letter-spacing: .24em; text-transform: uppercase; color: var(--ash);
+}
+.loader-bar { grid-row: 2; height: 1px; background: var(--rule); overflow: hidden; }
+/* scaleX, not width: the bar repaints every frame while the count climbs. */
+.loader-fill {
+  display: block; height: 100%; width: 100%; background: var(--accent);
+  transform: scaleX(0); transform-origin: left center;
+}
+.loader-meta {
+  grid-row: 3; display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  font-family: var(--font-mono); font-size: .62rem; font-weight: 500;
+  letter-spacing: .22em; text-transform: uppercase;
+}
+.loader-status { color: var(--ash); }
+.loader-pct { color: var(--accent); font-variant-numeric: tabular-nums; }
+
+/* 01 · TOKENS ---------------------------------------------------------------- */
+:root {
+  --ink: #0b0806;          /* scrim colour from the brief — also the page base */
+  --panel: #14100d;        /* solid card / form surface */
+  --bone: #ede9e0;
+  /* Secondary text is deliberately lighter than the original #8a8780: over
+     video, #8a8780 measured only ~2.5:1 against the text-side highlights.
+     #b9b5ac clears 4.5:1 on every scene — verified by check-contrast.js. */
+  --ash: #b9b5ac;
+  --accent: #ffc46b;       /* animated per scene by GSAP (gold, or ice on S3) */
+  --rule: rgba(237, 233, 224, 0.16);
+
+  /* ---- TYPOGRAPHY ------------------------------------------------------------
+     Three roles, defined once here and switched by CONFIG.fontPreset. Preset A
+     is the :root default; B and C override only these variables, so switching
+     never touches a single component rule. Each stack ends in a real fallback
+     so the page stays readable before (or without) the webfont. */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Type scale — every size in the layout comes from here, not ad-hoc. */
+  --step--1: clamp(0.6875rem, 0.67rem + 0.09vw, 0.75rem);   /* 11 → 12px labels */
+  --step-0:  clamp(0.9375rem, 0.92rem + 0.1vw, 1rem);       /* 15 → 16px        */
+  --step-1:  clamp(1.0625rem, 1.02rem + 0.2vw, 1.125rem);   /* 17 → 18px        */
+  --step-2:  clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);       /* 20 → 24px        */
+  --step-3:  clamp(1.625rem, 1.4rem + 1.1vw, 2.125rem);     /* 26 → 34px        */
+  --step-4:  clamp(2.25rem, 1.75rem + 2.4vw, 3.5rem);       /* 36 → 56px        */
+  --step-5:  clamp(3rem, 1.9rem + 5.2vw, 7rem);            /* 48 → 112px       */
+
+  --fs-display: var(--step-5);
+  --fs-sec: var(--step-4);
+  --fs-card: var(--step-3);
+  --fs-copy: clamp(16px, 1.1vw, 18px);   /* body paragraph, per the type spec */
+  --fs-label: var(--step--1);           /* mono micro labels */
+  --fs-ui: 13px;                         /* nav + buttons */
+
+  /* Headings and body sit directly on video; this keeps their edges readable
+     without adding a plate or changing the scrim. */
+  --shadow-video: 0 2px 28px rgba(0, 0, 0, 0.35);
+
+  --gutter: clamp(1.25rem, 4vw, 4rem);
+  --nav-h: 4.25rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Font preset B — editorial, higher contrast, lighter body. */
+html[data-font="B"] {
+  --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+/* Font preset C — Didone display with a neutral grotesque. */
+html[data-font="C"] {
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* 02 · RESET ----------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: auto; }
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+body {
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.65;
+  font-weight: 400;
+  font-feature-settings: "kern" 1, "liga" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+  min-height: 100vh;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { background: none; border: 0; color: inherit; font: inherit; cursor: pointer; }
+ul, ol { list-style: none; }
+em { font-style: italic; }
+::selection { background: var(--accent); color: var(--ink); }
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--ink); }
+::-webkit-scrollbar-thumb { background: #2a2724; border: 3px solid var(--ink); border-radius: 8px; }
+
+/* 03 · UTILITIES -------------------------------------------------------------- */
+.mono-micro {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.mask { display: block; overflow: hidden; }
+.mask-inner { display: inline-block; will-change: transform; }
+.accent-dot { color: var(--accent); }
+.skip-link {
+  position: fixed; top: 0.75rem; left: 0.75rem; z-index: 300;
+  padding: 0.6rem 1rem; background: var(--accent); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  transform: translateY(-300%); transition: transform 0.25s var(--ease-out);
+}
+.skip-link:focus-visible { transform: translateY(0); }
+
+/* Headings sit directly on video. A soft drop shadow keeps their edges legible
+   over the bright snow and sky scenes without adding a plate or touching the
+   scrim. Verified per-scene by check-contrast.js. */
+.sec-title, .display-name, .closing-line, .case-title,
+.card-title, .card-num, .quote blockquote, .about-stats dd {
+  text-shadow: var(--shadow-video);
+}
+
+/* 04 · GRAIN ------------------------------------------------------------------- */
+.grain {
+  position: fixed; inset: -100%; z-index: 150; pointer-events: none; opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 300px 300px;
+  animation: grain-shift 0.9s steps(2) infinite;
+}
+@keyframes grain-shift {
+  0% { transform: translate3d(0,0,0); } 25% { transform: translate3d(-2%,1.5%,0); }
+  50% { transform: translate3d(1.5%,-2%,0); } 75% { transform: translate3d(-1%,-1%,0); }
+  100% { transform: translate3d(2%,1%,0); }
+}
+
+/* 05 · CURSOR -------------------------------------------------------------------- */
+/* A crisp arrow whose tip lands exactly on the real pointer, plus a soft glow
+   tinted by the per-scene --accent (icy blue in S3, warm gold elsewhere).
+   z-index 240 clears the case overlay (220) but stays under the skip link (300).
+   Every layer is pinned at top/left 0 and moved ONLY by translate3d, so the
+   single rAF loop never touches layout. pointer-events never leave none. */
+#cursor { position: fixed; inset: 0; z-index: 240; pointer-events: none; opacity: 0; transition: opacity .25s var(--ease-out); }
+html.cursor-ready #cursor { opacity: 1; }
+html.cursor-ready #cursor.is-hidden,
+html.cursor-ready #cursor.is-off { opacity: 0; }
+/* Native cursor is suppressed only once a real move has been seen, and only
+   for a genuine fine pointer — touch keeps the platform behaviour entirely. */
+html.cursor-ready body,
+html.cursor-ready a,
+html.cursor-ready button,
+html.cursor-ready [role="button"] { cursor: none; }
+html.cursor-ready.is-text-field body,
+html.cursor-ready.is-text-field a,
+html.cursor-ready.is-text-field button,
+html.cursor-ready.is-text-field [role="button"] { cursor: auto; }
+
+.cur-arrow, .cur-glow, .cur-ripple, .cur-pill, .cur-ember {
+  position: fixed; top: 0; left: 0;
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* --- arrow -------------------------------------------------------------------- */
+/* NO transition on `transform`: JS rewrites it every frame, so a transition
+   restarts on every repaint and drags the arrow behind the real pointer. Only
+   `scale` is transitioned here, for the link-state pop. The arrow tip is
+   locked to the pointer; the soft glow behind it is what carries the lag. */
+.cur-arrow { transition: scale .18s var(--ease-out); }
+/* The SVG stroke would otherwise be clipped by the viewBox; overflow visible
+   keeps the 1.5px dark outline crisp all the way to the tip at (0,0). */
+.cur-arrow svg { overflow: visible; display: block; }
+#cursor.is-link .cur-arrow { scale: 1.15; }
+/* Over a text field the custom arrow is replaced by the native I-beam. */
+#cursor.is-off .cur-arrow, #cursor.is-hidden .cur-arrow { opacity: 0; }
+
+/* --- glow --------------------------------------------------------------------- */
+.cur-glow {
+  width: 120px; height: 120px; margin: -60px 0 0 -60px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--accent) 78%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 34%, transparent) 38%,
+    transparent 70%);
+  opacity: .35;
+  mix-blend-mode: screen;
+  transition: width .3s var(--ease-out), height .3s var(--ease-out), opacity .3s;
+}
+#cursor.is-link .cur-glow { width: 160px; height: 160px; margin: -80px 0 0 -80px; opacity: .55; }
+#cursor.is-off .cur-glow, #cursor.is-hidden .cur-glow { opacity: 0; }
+#cursor.mode-minimal-arrow .cur-glow { display: none; }
+
+/* --- "View" pill (project cards) ------------------------------------------------ */
+.cur-pill {
+  margin: -13px 0 0 18px;
+  padding: .34rem .6rem;
+  border-radius: 999px;
+  background: var(--accent); color: var(--ink);
+  font-family: var(--font-body); font-size: 11px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
+  opacity: 0; transform-origin: left center; scale: .8;
+  transition: opacity .18s var(--ease-out), scale .18s var(--ease-out);
+}
+#cursor.is-view .cur-pill { opacity: 1; scale: 1; }
+
+/* --- ember trail (ember-trail style) -------------------------------------------- */
+.cur-ember {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent);
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+#cursor.mode-minimal-arrow .cur-embers,
+#cursor.mode-glow-arrow .cur-embers { display: none; }
+
+/* --- press ripple ---------------------------------------------------------------- */
+.cur-ripple {
+  width: 12px; height: 12px; margin: -6px 0 0 -6px;
+  border: 1.5px solid var(--bone); border-radius: 50%;
+  opacity: 0;
+}
+
+/* --- shooting star (WebGL pointer) --------------------------------------------- */
+/* In this mode the canvas IS the cursor: arrow, glow, embers and press ring are
+   all replaced by the particle trail. The "View" pill survives, because it
+   carries information the star cannot. One pixel of context loss is avoided by
+   sizing the backing store to devicePixelRatio in JS. z-index 239 puts the star
+   under the pill (240) but over every scene layer and the case overlay. */
+#starCursor {
+  position: fixed; inset: 0; width: 100%; height: 100%;
+  z-index: 239; pointer-events: none;
+  opacity: 0; transition: opacity .3s var(--ease-out);
+}
+html.cursor-ready #starCursor { opacity: 1; }
+html.cursor-ready #starCursor.is-hidden,
+html.cursor-ready #starCursor.is-off,
+html.cursor-ready.is-text-field #starCursor { opacity: 0; }
+/* No WebGL, no canvas: nothing should reserve the fixed overlay. */
+#starCursor.is-dead { display: none; }
+#cursor.mode-shooting-star .cur-arrow,
+#cursor.mode-shooting-star .cur-glow,
+#cursor.mode-shooting-star .cur-embers,
+#cursor.mode-shooting-star .cur-ripple { display: none; }
+
+/* 06 · NAV ------------------------------------------------------------------------- */
+#siteNav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; border-bottom: 1px solid transparent; transition: border-color .4s, background-color .4s; }
+#siteNav.is-scrolled { border-bottom-color: var(--rule); background: rgba(11,8,6,.8); }
+.nav-inner { height: var(--nav-h); padding: 0 var(--gutter); display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+/* The brand is the emblem, cut to a transparent PNG (assets/logo.png). It is
+   sized off the nav height rather than a fixed px so it stays optically level
+   with the nav links at every breakpoint, and `object-fit: contain` keeps the
+   winged silhouette uncropped inside that box. */
+.nav-brand {
+  display: inline-flex; align-items: center;
+  height: var(--nav-h);
+  white-space: nowrap;
+  will-change: transform;
+}
+.nav-logo {
+  height: 58%;
+  max-height: 2.6rem;
+  width: auto;
+  object-fit: contain;
+  /* the mark is gold on a dark scrim; a hairline lift keeps the thin gold
+     outlines legible when the video behind the nav goes bright */
+  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, .55));
+}
+.nav-right { display: flex; align-items: center; gap: clamp(.9rem, 2vw, 2rem); }
+.nav-link {
+  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  position: relative; padding-block: .35rem;
+}
+.nav-link::after {
+  content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 1px;
+  background: var(--accent); transform: scaleX(0); transform-origin: right;
+  transition: transform .45s var(--ease-out);
+}
+.nav-link:hover::after, .nav-link:focus-visible::after { transform: scaleX(1); transform-origin: left; }
+.nav-clock {
+  font-family: var(--font-mono); font-size: .66rem; letter-spacing: .18em; color: var(--ash);
+  font-variant-numeric: tabular-nums; padding-left: clamp(.6rem, 1.4vw, 1.3rem);
+  border-left: 1px solid var(--rule);
+}
+
+/* 07 · SCENE LAYER + SCRIM --------------------------------------------------------- */
+#sceneLayer { position: fixed; inset: 0; z-index: 1; background: var(--ink); overflow: hidden; }
+/* One wrapper per scene: the section crossfade animates the wrapper, while the
+   two clips inside crossfade with each other to loop seamlessly. */
+#sceneLayer .scene {
+  position: absolute; inset: 0;
+  opacity: 0;
+  will-change: opacity, transform;
+}
+#sceneLayer .scene.is-active { opacity: 1; }
+#sceneLayer video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  will-change: opacity;
+  backface-visibility: hidden;
+}
+/* Poster-only mode (reduced motion / save-data / autoplay blocked): gentle CSS zoom */
+.is-poster-only #sceneLayer .scene { animation: poster-zoom 18s ease-in-out infinite alternate; }
+@keyframes poster-zoom { from { transform: scale(1.02); } to { transform: scale(1.12); } }
+
+#sceneScrim {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  /* One flat colour; the stop alphas are animated per scene by GSAP
+     (--sa-l / --sa-m / --sa-r = left / middle / right). Heavier on the text side. */
+  background: linear-gradient(to right,
+    rgba(11, 8, 6, var(--sa-l, .89)) 0%,
+    rgba(11, 8, 6, var(--sa-m, .42)) 52%,
+    rgba(11, 8, 6, var(--sa-r, .29)) 100%);
+}
+
+/* 08 · PROGRESS METER ---------------------------------------------------------------- */
+#sceneMeter { position: fixed; right: clamp(.6rem, 1.6vw, 1.4rem); top: 50%; transform: translateY(-50%); z-index: 120; }
+.meter-list { display: flex; flex-direction: column; gap: .85rem; align-items: flex-end; }
+.meter-item { display: flex; align-items: center; justify-content: flex-end; gap: .6rem; }
+.meter-label {
+  font-family: var(--font-mono); font-size: .58rem; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ash); opacity: 0; transform: translateX(6px);
+  transition: opacity .35s var(--ease-out), transform .35s var(--ease-out), color .35s;
+  white-space: nowrap; order: -1;
+}
+.meter-item:hover .meter-label, .meter-item:focus-visible .meter-label,
+.meter-item[aria-current="true"] .meter-label { opacity: 1; transform: translateX(0); }
+.meter-item[aria-current="true"] .meter-label { color: var(--bone); }
+.meter-dot {
+  width: 9px; height: 9px; flex-shrink: 0;
+  border: 1px solid rgba(237,233,224,.45);
+  border-radius: 50%;
+  background: transparent;
+  transition: background-color .4s, border-color .4s, transform .5s var(--ease-out);
+}
+.meter-item:hover .meter-dot, .meter-item:focus-visible .meter-dot { border-color: var(--bone); transform: scale(1.2); }
+.meter-item[aria-current="true"] .meter-dot { background: var(--accent); border-color: var(--accent); transform: scale(1.45); }
+
+/* 09 · BACKGROUND TOGGLE -------------------------------------------------------------- */
+
+
+/* 10 · PANELS --------------------------------------------------------------------- */
+main { position: relative; z-index: 3; }
+.panel { position: relative; min-height: 100vh; display: flex; align-items: center; }
+.panel-tall { min-height: 128vh; }
+.panel-inner { width: 100%; padding: clamp(6rem, 14vh, 10rem) var(--gutter); position: relative; }
+.panel-copy { max-width: min(46rem, 56%); }
+.sec-head { margin-bottom: clamp(2rem, 5vh, 4rem); }
+.sec-label { display: block; margin-bottom: clamp(1rem, 2.5vh, 1.8rem); }
+.sec-title {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: var(--fs-sec); line-height: .96; letter-spacing: -.01em;
+  max-width: 16ch;
+}
+/* A section title may set one accent word in italic. The hero name never does. */
+.sec-title em { font-style: italic; }
+.sec-title-sm { font-size: clamp(1.8rem, 3.4vw, 3.2rem); }
+/* The name is one line, never wrapped. fitName() in main.js measures the text
+   column and sets the final size, so the full name always fits the left column
+   on desktop and the full width on mobile without reaching the subject. */
+.display-name {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: var(--fs-display); line-height: .92; letter-spacing: -.02em;
+  text-transform: uppercase;
+  font-style: normal;
+  white-space: nowrap;
+}
+.lead {
+  margin-top: clamp(1.2rem, 3vh, 2.2rem); color: var(--bone);
+  font-family: var(--font-body); font-weight: 600;
+  font-size: var(--step-1); letter-spacing: .2em; text-transform: uppercase;
+}
+.lead-sub { color: var(--ash); margin-top: .3rem; }
+.panel-foot {
+  margin-top: clamp(2rem, 5vh, 4rem); padding-top: 1.2rem;
+  border-top: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.scroll-cue { display: inline-flex; align-items: center; gap: .9rem; }
+.cue-line { width: 1px; height: 44px; background: var(--accent); transform-origin: top; animation: cue-sweep 2.1s var(--ease-out) infinite; }
+@keyframes cue-sweep {
+  0% { transform: scaleY(0); transform-origin: top; }
+  45% { transform: scaleY(1); transform-origin: top; }
+  55% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* 11 · WORK GRID ---------------------------------------------------------------------- */
+.work-grid { display: grid; gap: clamp(1rem, 2vw, 1.6rem); grid-template-columns: 1fr; }
+.card {
+  position: relative;
+  background: rgba(20, 16, 13, 0.96);       /* solid panel, no blur, no glass */
+  border: 1px solid var(--rule);
+  padding: clamp(1.2rem, 2.4vw, 2rem);
+  display: flex; flex-direction: column; gap: 20px;
+  height: 100%;                             /* equal height across the row */
+  transition: border-color .4s, transform .5s var(--ease-out), background-color .4s;
+}
+/* One rhythm for the whole card: 20px between media, title, tags and blurb. */
+.card-media { margin-bottom: 20px; }
+.card:hover, .card:focus-within { border-color: var(--accent); transform: translateY(-3px); }
+.card-num { font-family: var(--font-display); font-weight: 500; font-size: 1.9rem; line-height: 1; color: var(--accent); }
+.card-title { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-card); line-height: 1.06; letter-spacing: -.01em; }
+.card-meta { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: .14em; color: var(--ash); }
+.card-blurb {
+  font-family: var(--font-body); font-size: var(--fs-copy); line-height: 1.65;
+  font-weight: 400; color: rgba(237, 233, 224, 0.88); max-width: 62ch;
+}
+
+/* Screenshot or, until one exists, a toned placeholder panel in the site's own
+   palette — a hairline frame, a fine diagonal hatch and an accent glyph. */
+.card-media {
+  position: relative; overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: #100d0a;
+  border: 1px solid var(--rule);
+}
+.card-media img { width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+.card-media--placeholder {
+  display: grid; place-items: center;
+  background:
+    repeating-linear-gradient(135deg, rgba(237,233,224,.05) 0 1px, transparent 1px 9px),
+    linear-gradient(160deg, #17120e 0%, #0d0b09 100%);
+}
+.card-media--placeholder::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(120% 95% at 50% 0%, rgba(255,196,107,.10), transparent 70%);
+}
+.panel-mark { position: absolute; inset: 10px; border: 1px solid rgba(237,233,224,.10); pointer-events: none; }
+.panel-glyph { position: relative; color: var(--accent); opacity: .6; display: grid; place-items: center; }
+.panel-glyph svg { width: 34px; height: 34px; }
+
+.card-tags { display: flex; flex-wrap: wrap; gap: .45rem; }
+.card-tag {
+  font-family: var(--font-mono); font-size: .56rem; letter-spacing: .18em; text-transform: uppercase;
+  padding: .3rem .62rem; border: 1px solid var(--rule); border-radius: 999px; color: var(--ash);
+  transition: border-color .3s, color .3s;
+}
+.card:hover .card-tag, .card:focus-within .card-tag { color: var(--bone); border-color: rgba(237,233,224,.3); }
+
+.card-cta {
+  margin-top: auto; padding-top: .6rem;    /* pinned to the bottom edge */
+  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  position: relative; width: fit-content;
+}
+.card-cta::after { content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: right; transition: transform .5s var(--ease-out); }
+.card:hover .card-cta:not(.card-cta--soon)::after, .card:focus-within .card-cta:not(.card-cta--soon)::after { transform: scaleX(1); transform-origin: left; }
+/* No link yet — stated quietly instead of faking an affordance. */
+.card-cta--soon { color: #6f6b65; letter-spacing: .1em; }
+
+/* 12 · ABOUT ---------------------------------------------------------------------------- */
+.about-split { display: flex; justify-content: flex-end; }
+.about-split .panel-copy { max-width: min(44rem, 54%); }
+.about-copy {
+  font-family: var(--font-body); font-size: var(--fs-copy); line-height: 1.65;
+  font-weight: 400; color: rgba(237, 233, 224, 0.88);
+  max-width: 62ch; margin-top: .5rem;
+}
+.about-para + .about-para { margin-top: .85em; }
+/* Stats row and "what I care about" — built only when their CONFIG flags are on. */
+.about-stats { display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 1.8rem; }
+.about-stats dd { font-family: var(--font-display); font-weight: 500; font-size: 1.8rem; }
+.about-list { margin-top: 1.4rem; display: grid; gap: .4rem; }
+.about-list li { font-family: var(--font-body); font-size: var(--step-0); color: var(--ash); }
+
+/* 13 · SKILLS ---------------------------------------------------------------------------- */
+/* Five groups on a 6-track grid: 2 + 2 + 2 on row one, 4 + 2 on row two. */
+.skill-bento { display: grid; gap: clamp(.8rem, 1.6vw, 1.25rem); grid-template-columns: 1fr; }
+.skill-card {
+  background: rgba(20, 16, 13, 0.96); border: 1px solid var(--rule);
+  padding: clamp(1.1rem, 2vw, 1.6rem);
+  display: flex; flex-direction: column; gap: clamp(.8rem, 1.6vw, 1.15rem);
+  transition: border-color .4s, transform .5s var(--ease-out);
+}
+.skill-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+.skill-head { display: flex; align-items: center; gap: .7rem; }
+.skill-head h3 { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.15rem, 1.9vw, 1.55rem); line-height: 1.1; }
+.skill-icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--accent); }
+.skill-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.skill-chip {
+  font-family: var(--font-mono); font-size: .62rem; letter-spacing: .12em;
+  padding: .42rem .72rem; border: 1px solid var(--rule); border-radius: 999px;
+  color: var(--bone); background: rgba(20,16,13,.8);
+  transition: border-color .3s, color .3s, background-color .3s;
+}
+.skill-chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,196,107,.07); }
+
+/* 14 · REVIEWS ----------------------------------------------------------------------------- */
+/* S4's face is dead centre: heading stays top-left, quotes ride the bottom 40%. */
+#reviews .panel-inner { display: flex; flex-direction: column; min-height: 100vh; }
+.quotes { display: grid; gap: clamp(1rem, 2vw, 1.6rem); grid-template-columns: 1fr; margin-top: auto; margin-bottom: clamp(2rem, 8vh, 6rem); }
+.quote {
+  background: rgba(20, 16, 13, 0.96); border: 1px solid var(--rule);
+  padding: clamp(1.2rem, 2.2vw, 1.8rem);
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.quote blockquote { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.1rem, 1.7vw, 1.5rem); line-height: 1.35; }
+.quote figcaption { font-family: var(--font-mono); font-size: .62rem; letter-spacing: .18em; color: var(--ash); }
+
+/* 15 · CONTACT -------------------------------------------------------------------------------- */
+.contact-form { display: grid; gap: 1rem; margin: clamp(1.6rem, 4vh, 2.6rem) 0; max-width: 34rem; }
+.field { display: grid; gap: .4rem; }
+.field input, .field textarea {
+  font-family: var(--font-body); font-size: var(--fs-copy); color: var(--bone);
+  background: rgba(20,16,13,.9); border: 1px solid var(--rule);
+  padding: .8rem .9rem; resize: vertical;
+  transition: border-color .3s;
+}
+.field input::placeholder, .field textarea::placeholder { color: #6f6b65; }
+.field input:focus, .field textarea:focus { border-color: var(--accent); outline: none; }
+.btn-ghost {
+  justify-self: start;
+  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  border: 1px solid var(--accent); color: var(--accent);
+  padding: .85rem 1.4rem; border-radius: 999px;
+  transition: background-color .35s, color .35s;
+  will-change: transform;
+}
+.btn-ghost:hover, .btn-ghost:focus-visible { background: var(--accent); color: var(--ink); }
+.form-status {
+  min-height: 1.2em; color: var(--accent);
+  font-family: var(--font-body); font-size: var(--step-0);
+}
+.btn-magnetic {
+  display: inline-grid; place-items: center; gap: .3rem;
+  width: clamp(10rem, 15vw, 11.5rem); aspect-ratio: 1;
+  border: 1px solid var(--rule); border-radius: 50%;
+  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  text-align: center;
+  transition: background-color .45s var(--ease-out), color .45s, border-color .45s;
+  will-change: transform;
+}
+.btn-magnetic:hover, .btn-magnetic:focus-visible { background: var(--accent); color: var(--ink); border-color: var(--accent); }
+.socials { display: flex; flex-wrap: wrap; gap: 1.4rem; margin-top: clamp(1.6rem, 4vh, 2.4rem); }
+.social-link {
+  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--ash);
+  display: inline-flex; gap: .5rem; will-change: transform;
+  transition: color .3s, transform .4s var(--ease-out);
+}
+.social-link:hover { color: var(--accent); transform: translateX(.3rem); }
+.social-handle { color: var(--ash); opacity: .75; }
+
+/* 16 · END ------------------------------------------------------------------------------------- */
+.panel-end .panel-inner { display: flex; flex-direction: column; justify-content: flex-end; min-height: 100vh; }
+/* The closing line is the one place that does NOT reuse the display serif: it is
+   set in the mono label face, uppercase, with open tracking, so the ending reads
+   as a quiet sign-off instead of one more big serif headline. Still large enough
+   to close the page, and the existing .mask reveal still animates it. */
+.closing-line {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 1rem + 2.4vw, 3rem);
+  line-height: 1.14;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+/* letter-spacing also pads AFTER the final character, which would leave the
+   full stop marooned away from the text. Pull the dot back by one step. */
+.closing-line .accent-dot { margin-right: -.18em; }
+/* The <em> used to carry an italic serif; in mono caps that reads as a mistake,
+   so it stays upright. No colour change: the accent belongs to the full stop. */
+.closing-line em { font-style: normal; }
+#siteFoot {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: .8rem 2rem;
+  padding: 1.4rem 0 0; margin-top: clamp(2.5rem, 8vh, 5rem); border-top: 1px solid var(--rule);
+}
+
+.foot-link { color: var(--ash); will-change: transform; transition: color .3s; }
+.foot-link:hover, .foot-link:focus-visible { color: var(--accent); }
+
+/* 17 · CASE OVERLAY ------------------------------------------------------------------------------- */
+#caseOverlay { position: fixed; inset: 0; z-index: 220; }
+.case-backdrop { position: absolute; inset: 0; background: rgba(11,8,6,.97); opacity: 0; }
+.case-scroll { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; padding: clamp(1.2rem,4vh,3rem) clamp(1.2rem,5vw,4rem) 4rem; }
+.case-close {
+  position: fixed; top: 1.4rem; right: clamp(1.2rem,5vw,4rem); z-index: 5;
+  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  border: 1px solid var(--rule); border-radius: 999px; padding: .7rem 1.1rem;
+  transition: border-color .3s, color .3s, background-color .3s;
+}
+.case-close:hover, .case-close:focus-visible { border-color: var(--accent); color: var(--ink); background: var(--accent); }
+.case-media { position: relative; height: 52vh; min-height: 300px; margin-top: .5rem; }
+.case-media-box { position: absolute; inset: 0; overflow: hidden; will-change: transform; transform-origin: top left; }
+.case-media-box img { width: 100%; height: 100%; object-fit: cover; }
+.case-body { max-width: 62rem; margin: clamp(2.5rem,6vh,4.5rem) auto 0; }
+.case-index { color: var(--accent); display: block; margin-bottom: .9rem; }
+.case-title { font-family: var(--font-display); font-weight: 500; font-size: clamp(2rem,5vw,4.4rem); line-height: 1; letter-spacing: -.01em; margin-bottom: clamp(2rem,5vh,3.5rem); }
+.case-grid { display: grid; grid-template-columns: 1fr; gap: 2rem 3rem; border-top: 1px solid var(--rule); padding-top: 2rem; }
+.case-cell dt { margin-bottom: .7rem; }
+.case-cell dd { font-family: var(--font-body); font-size: var(--fs-copy); line-height: 1.65; color: rgba(237, 233, 224, 0.88); }
+.case-cell dd#caseStack { font-family: var(--font-mono); font-size: .76rem; letter-spacing: .12em; color: var(--ash); line-height: 2; }
+.case-links { display: flex; gap: 2.4rem; margin-top: 3rem; border-top: 1px solid var(--rule); padding-top: 2rem; }
+.case-links a { font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; border-bottom: 1px solid var(--ash); padding-bottom: .35rem; transition: color .3s, border-color .3s; }
+.case-links a:hover { color: var(--accent); border-color: var(--accent); }
+
+/* 18 · A11Y ------------------------------------------------------------------------------------------- */
+:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+
+/* 19 · RESPONSIVE ----------------------------------------------------------------------------------------- */
+@media (min-width: 720px) {
+  
+  .work-grid, .quotes { grid-template-columns: repeat(2, 1fr); }
+  .skill-bento { grid-template-columns: repeat(6, 1fr); }
+  .skill-card { grid-column: span var(--span, 2); }
+}
+@media (min-width: 1024px) {
+  .quotes { grid-template-columns: repeat(3, 1fr); }
+  /* Four cards read best as a 2x2 block rather than 3 + 1 orphan. */
+  .work-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+  .panel-copy, .about-split .panel-copy { max-width: 100%; }
+  .about-split { justify-content: flex-start; }
+  #sceneMeter .meter-label { display: none; }
+  /* On portrait the clip fills the frame and the subject's head sits in the
+     upper-middle, so a full-width name at the vertical centre would run across
+     the face. Drop the hero copy below that band; the name keeps the full
+     column width and its fitted size. */
+  #home .panel-copy { margin-top: 20vh; }
+}
+@media (max-width: 560px) {
+  /* The sans nav is wider than the old mono one, so the small breakpoint pulls
+     the gaps in to keep the row on a single line at 390px. */
+  .nav-right { gap: .5rem; }
+  .nav-link { font-size: .58rem; letter-spacing: .08em; }
+  .nav-logo { max-height: 2.1rem; }
+  .nav-clock { display: none; }
+}
+
+/* 20 · REDUCED MOTION ------------------------------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .grain, .cue-line { animation: none !important; }
+  /* Preloader: no wipe, no counting animation — it appears and is simply gone. */
+  #loader { transition: none !important; }
+  html.is-ready #loader { transform: none !important; }
+  .is-poster-only #sceneLayer .scene { animation: none !important; }
+  .card, .skill-card, .card-cta::after, .social-link, .btn-ghost, .btn-magnetic { transition: none !important; }
+  .card:hover, .skill-card:hover, .card:focus-within { transform: none; }
+  .mask-inner { transform: none !important; }
+  
+}

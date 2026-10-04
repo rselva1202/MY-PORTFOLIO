@@ -1,0 +1,30 @@
+# --- Local tooling ---------------------------------------------------------
+.freebuff/
+
+# --- Raw master footage ----------------------------------------------------
+# assets/source/ holds the 37MB original clip that assets/video/ was encoded
+# from. Nothing on the site references it -- the page loads only the finished
+# clips in assets/video/ -- so it stays out of history to keep the repo (and
+# every future clone) light. The file is untouched on disk.
+#
+# To restore it on another machine, copy it in manually or run
+# prepare-assets.sh, which regenerates assets/video/ from it.
+assets/source/
+
+# --- OS / editor cruft -----------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.idea/
+.vscode/
+
+# --- Secrets (none are committed today; this keeps it that way) ------------
+.env
+.env.*
+!.env.example
+
+# --- Logs / temp -----------------------------------------------------------
+*.log
+npm-debug.log*

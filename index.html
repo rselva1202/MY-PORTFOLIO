@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js is-loading">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SELVAGANAPATHY R | Full-Stack Developer</title>
+  <meta name="description" content="Portfolio of Selvaganapathy R — full-stack developer building web apps, dashboards and AI experiments with React, Flask, Node and Python." />
+  <meta name="author" content="Selvaganapathy R" />
+  <meta name="theme-color" content="#0b0806" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="SELVAGANAPATHY R" />
+  <meta property="og:title" content="SELVAGANAPATHY R | Full-Stack Developer" />
+  <meta property="og:description" content="Web apps, dashboards and AI experiments — built with React, Flask, Node and Python." />
+  <meta property="og:image" content="assets/posters/s1.jpg" />
+  <meta property="og:image:alt" content="A still frame from the site's scroll-driven video background." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <!-- Favicon set, all derived from assets/logo.png (the winged-blade emblem).
+       Listed least- to most-capable: .ico for anything without SVG favicon
+       support, then PNG as an explicit raster fallback, then the SVG. Browsers
+       take the first type they understand, so SVG lands in every modern tab. -->
+  <link rel="icon" href="assets/favicon.ico" sizes="any" />
+  <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+
+  <!-- Typography: three roles — display / body / mono — switched by
+       CONFIG.fontPreset in main.js. The href below is Preset A so the page is
+       still correct with JS off; applyFontPreset() rewrites it when another
+       preset is configured. display=swap avoids a flash of invisible text. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link id="fontLink" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" />
+
+  <!-- Tailwind (Play CDN, pinned) — utilities only; the design system lives in style.css -->
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          colors: { ink: '#0b0806', bone: '#ede9e0', ash: '#8a8780', gold: '#ffc46b', ice: '#7fd8ea' },
+          fontFamily: {
+            display: ['"Fraunces"', 'Georgia', 'serif'],
+            body: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Libraries — pinned. Three.js is gone; the background is scroll-driven video. -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+  <script defer src="main.js"></script>
+
+  <noscript><style>
+    /* No JS: the loader can never be dismissed by script, so drop it entirely
+       and release the scroll lock it holds on <html>. */
+    #loader { display: none !important; }
+    html.is-loading, html.is-loading body { overflow: auto !important; }
+    .grain, #cursor, #starCursor { display: none !important; }
+  </style></noscript>
+</head>
+
+<body>
+  <!-- 00 · PRELOADER — progress is driven by real readiness signals, not a timer -->
+  <div id="loader" role="status" aria-live="polite">
+    <div class="loader-inner">
+      <span class="loader-name">SELVAGANAPATHY R</span>
+      <span class="loader-role">FULL-STACK DEVELOPER</span>
+    </div>
+    <div class="loader-bar"><span class="loader-fill" id="loaderFill"></span></div>
+    <div class="loader-meta">
+      <span class="loader-status" id="loaderStatus">TYPEFACES</span>
+      <span class="loader-pct" id="loaderPct">000</span>
+    </div>
+  </div>
+  <script>
+    /* Failsafe. If main.js never executes — blocked CDN, parse error, offline —
+       this loader would trap the visitor on a black screen. It is cleared by
+       Loader.finish() the moment the real preloader takes over. */
+    window.__loaderFailsafe = setTimeout(function () {
+      document.documentElement.classList.remove('is-loading');
+      var l = document.getElementById('loader');
+      if (l) l.remove();
+    }, 7000);
+  </script>
+
+  <a class="skip-link" href="#work">Skip to selected work</a>
+
+  <!-- 01 · FILM GRAIN -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- 02 · CUSTOM CURSOR — CONFIG.cursorStyle picks the treatment:
+       'glow-arrow' / 'ember-trail' / 'minimal-arrow' draw arrow + accent glow
+       as DOM layers fixed at top/left 0, moved only with translate3d, so the
+       single rAF loop never reads layout;
+       'shooting-star' (default) hands the pointer to a WebGL particle field
+       painted on #starCursor and suppresses every DOM layer except the
+       "View" pill. Port of Ko.Yelie's "Shooting Star" (MIT, see
+       LICENSE-shooting-star.txt). -->
+  <canvas id="starCursor" aria-hidden="true"></canvas>
+  <div id="cursor" aria-hidden="true">
+    <span class="cur-glow" id="curGlow"></span>
+    <span class="cur-embers" id="curEmbers"></span>
+    <span class="cur-ripple" id="curRipple"></span>
+    <span class="cur-pill" id="curPill"><span id="curPillText">View</span></span>
+    <span class="cur-arrow" id="curArrow">
+      <!-- Tip sits at the element origin so translate3d(x, y, 0) puts it
+           exactly on the real pointer position. -->
+      <svg viewBox="0 0 20 24" width="20" height="24" focusable="false">
+        <path d="M0.75 0.75 L0.75 20.4 L5.9 15.8 L8.8 22.5 L12.2 21 L9.2 14.6 L15.8 14.4 Z"
+              fill="var(--bone)" stroke="#0b0806" stroke-width="1.5" stroke-linejoin="round" />
+      </svg>
+    </span>
+  </div>
+
+  <!-- 03 · NAV -->
+  <header id="siteNav">
+    <nav class="nav-inner" aria-label="Primary"><a href="#home" class="nav-brand" data-magnetic data-cursor="link" aria-label="Selvanapathy R — home"><img class="nav-logo" src="assets/logo.png" alt="" width="317" height="418" decoding="async"></a>
+      <div class="nav-right">
+          <a class="nav-link" href="#work" data-cursor="link">WORK</a>
+          <a class="nav-link" href="#about" data-cursor="link">ABOUT</a>
+          <a class="nav-link" href="#skills" data-cursor="link">SKILLS</a>
+          <a class="nav-link" href="#reviews" data-cursor="link">REVIEWS</a>
+          <a class="nav-link" href="#contact" data-cursor="link">CONTACT</a>
+        <span class="nav-clock" id="navClock" role="timer" aria-label="Local time">--:--</span>
+      </div>
+    </nav>
+  </header>
+
+  <!-- 04 · SCROLL-DRIVEN VIDEO LAYERS — 7 stacked clips, populated by main.js -->
+  <div id="sceneLayer" aria-hidden="true"></div>
+  <!-- 05 · READABILITY SCRIM — one flat colour, heavier on the text side -->
+  <div id="sceneScrim" aria-hidden="true"></div>
+
+  <!-- 06 · PROGRESS METER -->
+  <nav id="sceneMeter" aria-label="Scene navigation">
+    <ol class="meter-list" id="meterList"><!-- built from SCENES in main.js --></ol>
+  </nav>
+
+  <main id="main">
+
+    <!-- 08 · HOME → S1 golden forest, text left, subject right -->
+    <section id="home" class="panel panel-tall" data-scene="s1" aria-label="Introduction">
+      <div class="panel-inner">
+        <div class="panel-copy">
+          <h1 class="display-name" id="displayName">
+            <span class="mask"><span class="mask-inner" id="displayNameText">SELVAGANAPATHY R</span></span>
+          </h1>
+          <p class="lead" id="heroRole">FULL-STACK DEVELOPER</p>
+          <p class="lead-sub mono-micro">REACT — NODE — THREE.JS</p>
+        </div>
+        <div class="panel-foot">
+          <button class="scroll-cue" id="scrollCue" aria-label="Scroll to selected work">
+            <span class="mono-micro">SCROLL</span><span class="cue-line" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 09 · WORK → S2 farmland, heading left, cards on solid panels -->
+    <section id="work" class="panel panel-tall" data-scene="s2" aria-label="Selected work">
+      <div class="panel-inner">
+        <div class="sec-head">
+          <span class="sec-label mono-micro">(02) — SELECTED WORK</span>
+          <h2 class="sec-title"><span class="mask"><span class="mask-inner">Selected <em>Work</em></span></span></h2>
+        </div>
+        <div class="work-grid" id="workGrid"><!-- cards built from CONFIG --></div>
+      </div>
+    </section>
+
+    <!-- 10 · ABOUT → S3 snowy forest (cool), text right, figure centre-left -->
+    <section id="about" class="panel" data-scene="s3" aria-label="About">
+      <div class="panel-inner about-split">
+        <div class="panel-copy">
+          <span class="sec-label mono-micro">(03) — ABOUT</span>
+          <h2 class="sec-title"><span class="mask"><span class="mask-inner">Capabilities &amp; <em>Character</em></span></span></h2>
+          <div class="about-copy" id="aboutCopy"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 · SKILLS → S5 golden hills, text left, service cards + chips -->
+    <section id="skills" class="panel panel-tall" data-scene="s5" aria-label="Skills and services">
+      <div class="panel-inner">
+        <div class="sec-head">
+          <span class="sec-label mono-micro">(04) — SKILLS</span>
+          <h2 class="sec-title"><span class="mask"><span class="mask-inner">What I <em>ship</em></span></span></h2>
+        </div>
+        <div class="skill-bento" id="skillBento"><!-- groups built from CONFIG --></div>
+      </div>
+    </section>
+
+    <!-- 12 · REVIEWS → S4 portrait is centred: heading top-left, quotes along the bottom -->
+    <section id="reviews" class="panel" data-scene="s4" aria-label="Reviews">
+      <div class="panel-inner">
+        <div class="sec-head">
+          <span class="sec-label mono-micro">(05) — REVIEWS</span>
+          <h2 class="sec-title sec-title-sm"><span class="mask"><span class="mask-inner">Kind words, <em>loosely</em></span></span></h2>
+        </div>
+        <div class="quotes" id="quotes"></div>
+      </div>
+    </section>
+
+    <!-- 13 · CONTACT → S6 beach, form + email left -->
+    <section id="contact" class="panel" data-scene="s6" aria-label="Contact">
+      <div class="panel-inner">
+        <div class="panel-copy">
+          <span class="sec-label mono-micro">(06) — CONTACT</span>
+          <h2 class="sec-title"><span class="mask"><span class="mask-inner">Let’s build something <em>unforgettable</em></span></span></h2>
+          <form class="contact-form" id="contactForm" novalidate>
+            <div class="field">
+              <label class="mono-micro" for="cName">NAME</label>
+              <input id="cName" name="name" type="text" autocomplete="name" placeholder="Your name" />
+            </div>
+            <div class="field">
+              <label class="mono-micro" for="cEmail">EMAIL</label>
+              <input id="cEmail" name="email" type="email" autocomplete="email" placeholder="you@studio.com" />
+            </div>
+            <div class="field">
+              <label class="mono-micro" for="cMsg">PROJECT</label>
+              <textarea id="cMsg" name="message" rows="3" placeholder="A few lines about the work"></textarea>
+            </div>
+            <button class="btn-ghost" type="submit" data-magnetic data-cursor="link">SEND MESSAGE <span aria-hidden="true">→</span></button>
+            <p class="form-status" id="formStatus" role="status"></p>
+          </form>
+          <a id="emailBtn" class="btn-magnetic" data-magnetic data-cursor="link" href="mailto:rselva1204@gmail.com">EMAIL ME <span aria-hidden="true">↗</span></a>
+          <ul class="socials" id="socials" aria-label="Social links"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 14 · END → S7 close-up, large line left, footer row -->
+    <section id="end" class="panel panel-end" data-scene="s7" aria-label="Colophon">
+      <div class="panel-inner">
+        <p class="closing-line">
+          <span class="mask"><span class="mask-inner">Thanks for</span></span>
+          <span class="mask"><span class="mask-inner"><em>staying</em> this long<span class="accent-dot">.</span></span></span>
+        </p>
+        <footer id="siteFoot">
+          <span class="mono-micro" id="footCopy">© 2026 SELVAGANAPATHY R.</span>
+          <button class="foot-link mono-micro" id="backTop" data-magnetic data-cursor="link">BACK TO TOP <span aria-hidden="true">↑</span></button>
+        </footer>
+      </div>
+    </section>
+  </main>
+
+  <!-- 15 · CASE-STUDY OVERLAY (cards keep their FLIP expansion) -->
+  <div id="caseOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="caseTitle">
+    <div class="case-backdrop" id="caseBackdrop"></div>
+    <div class="case-scroll" id="caseScroll" data-lenis-prevent>
+      <button class="case-close" id="caseClose" data-cursor="link">CLOSE <span aria-hidden="true">×</span></button>
+      <div class="case-media"><div class="case-media-box" id="caseMediaBox"><img id="caseImg" alt="" decoding="async" /></div></div>
+      <div class="case-body" id="caseBody">
+        <span class="mono-micro case-index" id="caseIndex">01</span>
+        <h3 class="case-title" id="caseTitle"></h3>
+        <dl class="case-grid">
+          <div class="case-cell"><dt class="mono-micro">PROBLEM</dt><dd id="caseProblem"></dd></div>
+          <div class="case-cell"><dt class="mono-micro">STACK</dt><dd id="caseStack"></dd></div>
+          <div class="case-cell"><dt class="mono-micro">ROLE</dt><dd id="caseRole"></dd></div>
+          <div class="case-cell"><dt class="mono-micro">OUTCOME</dt><dd id="caseOutcome"></dd></div>
+        </dl>
+        <div class="case-links">
+          <a id="caseLinkLive" target="_blank" rel="noopener" data-cursor="link">VISIT LIVE <span aria-hidden="true">↗</span></a>
+          <a id="caseLinkRepo" target="_blank" rel="noopener" data-cursor="link">SOURCE <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
