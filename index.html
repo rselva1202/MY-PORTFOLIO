@@ -17,13 +17,19 @@
   <meta property="og:image:alt" content="A still frame from the site's scroll-driven video background." />
   <meta name="twitter:card" content="summary_large_image" />
   <!-- Favicon set, all derived from assets/logo.png (the winged-blade emblem).
-       Listed least- to most-capable: .ico for anything without SVG favicon
-       support, then PNG as an explicit raster fallback, then the SVG. Browsers
-       take the first type they understand, so SVG lands in every modern tab. -->
-  <link rel="icon" href="assets/favicon.ico" sizes="any" />
-  <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32" />
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+Listed least- to most-capable: .ico for anything without SVG favicon support,
+       then PNG as an explicit raster fallback, then the SVG. Browsers take the
+       first type they understand, so SVG lands in every modern tab.
+
+       The ?v=2 on each URL is deliberate and load-bearing. Browsers cache
+       favicons far more aggressively than any other asset -- they ignore
+       normal reloads and will happily keep serving a stale icon for weeks. When
+       the icon changes, these query strings MUST be bumped or nobody sees it.
+       Next time the emblem changes, change ?v=2 to ?v=3. -->
+  <link rel="icon" href="assets/favicon.ico?v=2" sizes="any" />
+  <link rel="icon" href="assets/favicon-32.png?v=2" type="image/png" sizes="32x32" />
+  <link rel="icon" href="assets/favicon.svg?v=2" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=2" />
 
   <!-- Typography: three roles — display / body / mono — switched by
        CONFIG.fontPreset in main.js. The href below is Preset A so the page is
