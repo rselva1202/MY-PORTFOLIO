@@ -560,6 +560,25 @@ main { position: relative; z-index: 3; }
 }
 .field input::placeholder, .field textarea::placeholder { color: #6f6b65; }
 .field input:focus, .field textarea:focus { border-color: var(--accent); outline: none; }
+/* 13b · OPEN-CHEST SUBMIT ------------------------------------------------------------
+   The send button is the owner's carved chest: closed at rest, the lid lifts on
+   hover (video scrub), click submits. Only shown when the device can hover and
+   the visitor hasn't asked for reduced motion — everywhere else the plain text
+   button stays, since a hover-scrub affordance is meaningless without hover. */
+.box-btn {
+  display: none;
+  position: relative; justify-self: start;
+  width: min(280px, 100%); aspect-ratio: 4 / 3;
+  border: 0; padding: 0; background: none; cursor: pointer;
+}
+html.has-box-btn .box-btn { display: block; }
+html.has-box-btn .contact-form .btn-ghost { display: none; }
+.box-btn video {
+  width: 100%; height: 100%; display: block; pointer-events: none;
+  border-radius: 10px;
+}
+.box-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 10px; }
+
 .btn-ghost {
   justify-self: start;
   font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;

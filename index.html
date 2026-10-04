@@ -239,6 +239,16 @@ Listed least- to most-capable: .ico for anything without SVG favicon support,
               <textarea id="cMsg" name="message" rows="3" placeholder="A few lines about the work"></textarea>
             </div>
             <button class="btn-ghost" type="submit" data-magnetic data-cursor="link">SEND MESSAGE <span aria-hidden="true">→</span></button>
+            <!-- 13b · OPEN-CHEST SUBMIT — the demo box-button interaction. The
+                 video is a 5s loop built from the owner's two stills
+                 (box-closed 0-2.5s, box-open 2.5-5s). Hover scrubs toward the
+                 open frame; leaving scrubs back. It REPLACES the text button's
+                 submit role, not its code: submitForm() still runs on click.
+                 data-box-btn excludes it from the magnetic-cursor hover lift so
+                 the video does the moving. -->
+            <button class="box-btn" id="boxBtn" type="submit" data-box-btn aria-label="Send message">
+              <video id="boxVid" src="assets/box-open-close.webm" muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
+            </button>
             <p class="form-status" id="formStatus" role="status"></p>
           </form>
           <a id="emailBtn" class="btn-magnetic" data-magnetic data-cursor="link" href="mailto:rselva1204@gmail.com">EMAIL ME <span aria-hidden="true">↗</span></a>
