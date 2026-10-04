@@ -143,11 +143,14 @@
         items: ['Problem Solving', 'Data Structures & Algorithms', 'Automation', 'API Integration', 'Telegram Bot Development', 'Software Project Development'] },
     ],
 
-    // Placeholder reviews — no real people are quoted here.
+    // Fictional-character quotes the owner chose for the reviews section
+    // (Vinland Saga and The Shawshank Redemption) — not professional
+    // testimonials, so the section heading still reads honestly.
     quotes: [
-      { text: 'Placeholder review — replace with a real quote before publishing.', who: 'Name — Role, Company' },
-      { text: 'Placeholder review — the tone should stay specific, not flattering.', who: 'Name — Role, Company' },
-      { text: 'Placeholder review — one concrete outcome beats three adjectives.', who: 'Name — Role, Company' },
+      { text: 'If you don\'t want to die, get stronger. If you don\'t want to lose, think.', who: 'Askeladd' },
+      { text: 'This world is a trial. A trial given to us by God.', who: 'Canute' },
+      { text: 'Even if we cannot change the world, we can change ourselves.', who: 'Thorfinn' },
+      { text: 'Hope is a good thing, maybe the best of things, and no good thing ever dies.', who: 'Andy Dufresne' },
     ],
 
     socials: [
