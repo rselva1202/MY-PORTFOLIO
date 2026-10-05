@@ -213,6 +213,12 @@ em { font-style: italic; }
   text-decoration: none;
   cursor: pointer;
   overflow: hidden;
+  /* Never stretch to fill a flex/grid parent. Several of these sit as direct
+     children of .card (column flex) and .contact-form (grid), where the
+     default align/justify of `stretch` would blow the button up to the full
+     card or column width. Shrink-wrap to the label instead. */
+  align-self: flex-start;
+  justify-self: start;
   /* The wipe: a flat gold layer anchored bottom-left, grown from zero width.
      background-size animates without dirtying layout, which matters because
      several of these sit inside cards that are already animating. */
@@ -223,7 +229,7 @@ em { font-style: italic; }
   transition: background-size var(--btn-dur) var(--ease-out),
               color var(--btn-dur) var(--ease-out),
               border-color var(--btn-dur) var(--ease-out),
-              transform 120ms var(--ease-out);
+              scale 120ms var(--ease-out);
 }
 /* The label and the arrow are separate so only the arrow moves on hover. */
 .btn-gold > * { position: relative; }
@@ -234,7 +240,13 @@ em { font-style: italic; }
 .btn-gold:focus-visible {
   outline: 2px solid var(--btn-gold); outline-offset: 3px;
 }
-.btn-gold:active { transform: scale(.98); }
+/* Press feedback uses the standalone `scale` property, not `transform`.
+   Two buttons carry data-magnetic, and GSAP writes an inline `transform` on
+   them while the pointer is near; an inline value beats any stylesheet rule,
+   so a `transform: scale(.98)` press would be dead on exactly those two.
+   `scale` is an independent property and composes with `transform`, so the
+   press works whether or not GSAP has touched the element. */
+.btn-gold:active { scale: .98; }
 .btn-gold[disabled],
 .btn-gold[aria-disabled="true"] {
   opacity: .5; cursor: not-allowed; pointer-events: none;
@@ -530,7 +542,11 @@ main { position: relative; z-index: 3; }
   border-top: 1px solid var(--rule);
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
 }
-.scroll-cue { display: inline-flex; align-items: center; gap: .9rem; }
+/* The cue is a .btn-gold--compact; layout comes from that class. Only the
+   extra breathing room between label and sweeping line belongs here, and it
+   must not restate display/align/gap — a later equal-specificity rule would
+   silently win over .btn-gold. */
+.scroll-cue { column-gap: 1.4rem; }
 .cue-line { width: 1px; height: 44px; background: var(--accent); transform-origin: top; animation: cue-sweep 2.1s var(--ease-out) infinite; }
 @keyframes cue-sweep {
   0% { transform: scaleY(0); transform-origin: top; }
@@ -648,9 +664,6 @@ main { position: relative; z-index: 3; }
 
 /* 15 · CONTACT -------------------------------------------------------------------------------- */
 .contact-form { display: grid; gap: 1rem; margin: clamp(1.6rem, 4vh, 2.6rem) 0; max-width: 34rem; }
-/* The submit is a grid item and would stretch to the full column. Keep it
-   shrink-wrapped to its label. */
-.contact-form .btn-gold { justify-self: start; }
 .field { display: grid; gap: .4rem; }
 .field input, .field textarea {
   font-family: var(--font-body); font-size: var(--fs-copy); color: var(--bone);
@@ -848,7 +861,7 @@ main { position: relative; z-index: 3; }
     color: var(--btn-dark); border-color: var(--btn-gold);
   }
   .btn-gold:hover .btn-gold-arrow, .btn-gold:focus-visible .btn-gold-arrow { transform: none !important; }
-  .btn-gold:active { transform: none !important; }
+  .btn-gold:active { scale: none !important; }
   /* The chest opens by rotating the lid in 3D. That is decorative motion, so
      reduced motion gets the closed chest and the accent border instead. */
   .chest-lid, .chest-lining, .chest-label { transition: none !important; }
