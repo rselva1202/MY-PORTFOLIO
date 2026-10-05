@@ -412,8 +412,9 @@
     const ul = document.getElementById('socials');
     CONFIG.socials.forEach((s) => {
       const li = document.createElement('li');
-      li.innerHTML = `<a class="social-link" data-magnetic href="${s.url}" target="_blank" rel="noopener noreferrer">` +
-        `${s.label}${s.handle ? ' <span class="social-handle">' + s.handle + '</span>' : ''} <span aria-hidden="true">↗</span></a>`;
+      li.innerHTML = `<a class="social-link" data-cursor="link" href="${s.url}" target="_blank" rel="noopener noreferrer">` +
+        `<span>${s.label}${s.handle ? ' <span class="social-handle">' + s.handle + '</span>' : ''}</span>` +
+        `<span class="social-arrow" aria-hidden="true">↗</span></a>`;
       ul.appendChild(li);
     });
   }
@@ -1669,7 +1670,7 @@ void main(){
       rise('.lead, .lead-sub, .panel-foot', '#home');
       rise('.about-copy', '#about');
       rise('.quote', '#quotes', { stagger: 0.1 });
-      rise('#contact .sec-label, .contact-form, .btn-magnetic, .social-link', '#contact');
+      rise('#contact .sec-label, .contact-form, .contact-actions', '#contact');
       rise('.closing-line, #siteFoot', '#end');
 
       // Skill groups: cards rise, then each card's chips stagger in sequence
@@ -1737,57 +1738,6 @@ void main(){
   function initBackToTop() {
     const btn = document.getElementById('backTop');
     if (btn) btn.addEventListener('click', () => scrollToTarget(document.getElementById('home')));
-  }
-
-  /* 13b · OPEN-CHEST SUBMIT — hover scrubs the owner's carved chest open,
-     leaving closes it, clicking submits the form. The scrubbing logic is the
-     demo's: the 5s clip runs closed→open (0–2.5s) then open→closed (2.5–5s),
-     so moving TO open plays forward from wherever we are and moving back plays
-     in reverse. rAF clamps at the endpoints so the lid never overshoots.
-
-     The plain text button stays for touch devices and reduced motion — a
-     hover-scrub is meaningless without hover, and auto-playing motion is
-     exactly what the reduced-motion preference exists to suppress. The form's
-     own submit handler in initForm() is untouched: this button type="submit",
-     so the mailto flow still runs. */
-  function initBoxSubmit() {
-    const btn = document.getElementById('boxBtn');
-    const v = document.getElementById('boxVid');
-    if (!btn || !v || !ENV.fine || ENV.reduced || !v.canPlayType('video/webm')) return;
-
-    root.classList.add('has-box-btn');
-
-    const HALF = 2.5;                       // open frame, and the turnaround point
-    const END = 4.95;                       // last close frame before the wrap
-    let mode = 'idle';
-
-    // Clamping lives on TWO clocks on purpose. The rAF loop gives frame-accurate
-    // endpoints while the tab renders; the timeupdate listener backs it up from
-    // the media pipeline itself, which keeps the lid parked even if rAF is
-    // throttled (background tab, occluded window, busy main thread). Either
-    // clock alone can be starved; both together cannot.
-    const clampOpen = () => {
-      if (mode === 'open' && v.currentTime >= HALF - 0.03) {
-        v.pause(); v.currentTime = HALF - 0.03; mode = 'idle';
-      } else if (mode === 'close' && (v.currentTime >= END || v.ended)) {
-        v.pause(); v.currentTime = 0; mode = 'idle';
-      }
-    };
-    const tick = () => { clampOpen(); requestAnimationFrame(tick); };
-    requestAnimationFrame(tick);
-    v.addEventListener('timeupdate', clampOpen);
-
-    btn.addEventListener('mouseenter', () => {
-      if (v.currentTime > HALF) v.currentTime = (HALF * 2) - v.currentTime;
-      mode = 'open'; v.play().catch(() => {});
-    });
-    btn.addEventListener('mouseleave', () => {
-      if (v.currentTime < HALF) v.currentTime = (HALF * 2) - v.currentTime;
-      mode = 'close'; v.play().catch(() => {});
-    });
-    // Keyboard parity: focus opens the lid, blur closes it, matching hover.
-    btn.addEventListener('focus', () => btn.dispatchEvent(new Event('mouseenter')));
-    btn.addEventListener('blur', () => btn.dispatchEvent(new Event('mouseleave')));
   }
 
   /* ==========================================================================
@@ -1940,7 +1890,6 @@ void main(){
     initClock();
     fitName();
     initBackToTop();
-    initBoxSubmit();
 
     // The webfont changes the measured width, so refit once it has landed.
     // Fonts are also a real preloader milestone — 30% of the bar.

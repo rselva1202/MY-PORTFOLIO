@@ -565,19 +565,111 @@ main { position: relative; z-index: 3; }
    hover (video scrub), click submits. Only shown when the device can hover and
    the visitor hasn't asked for reduced motion — everywhere else the plain text
    button stays, since a hover-scrub affordance is meaningless without hover. */
-.box-btn {
-  display: none;
-  position: relative; justify-self: start;
-  width: min(280px, 100%); aspect-ratio: 4 / 3;
-  border: 0; padding: 0; background: none; cursor: pointer;
+/* --- 13b · CONTACT ACTIONS — carved chest + social rails ---------------------
+   Built from the owner's mockup. The chest is three stacked parts (lid,
+   lining, base) in a perspective wrapper: the lid rotates open on its bottom
+   edge to reveal the gold lining. Each social rail wipes its accent in from the
+   left via an animated background-size, which is why the fill is painted as a
+   gradient sized 0% and grown to 100% rather than a pseudo-element scale --
+   background-size never triggers layout.
+
+   Both interactions are pure CSS. No JS, no video, and no asset fetch, so they
+   cost nothing on load and degrade to plain bordered links if the hover never
+   arrives (touch, keyboard-only, reduced motion). */
+
+.contact-actions {
+  display: flex; align-items: flex-start; justify-content: center;
+  gap: clamp(2rem, 6vw, 3.5rem); flex-wrap: wrap;
+  margin-top: clamp(1.8rem, 5vh, 2.8rem);
 }
-html.has-box-btn .box-btn { display: block; }
-html.has-box-btn .contact-form .btn-ghost { display: none; }
-.box-btn video {
-  width: 100%; height: 100%; display: block; pointer-events: none;
-  border-radius: 10px;
+
+/* The chest ---------------------------------------------------------------- */
+.chest {
+  --chest-w: 190px;
+  --chest-rim: color-mix(in srgb, var(--accent) 62%, transparent);
+  --chest-wood: color-mix(in srgb, var(--ink) 82%, var(--accent) 18%);
+  --chest-base: color-mix(in srgb, var(--ink) 88%, var(--accent) 12%);
+  position: relative;
+  display: inline-flex; flex-direction: column; align-items: center;
+  width: var(--chest-w);
+  text-decoration: none;
+  perspective: 500px;
+  cursor: pointer;
 }
-.box-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 10px; }
+/* The lid is the only 3D part; everything below it stays flat so the open
+   chest does not skew. transform-origin is its BOTTOM edge -- that is the
+   hinge, which is what makes it read as a lid rather than a card. */
+.chest-lid {
+  width: 100%; height: 62px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--chest-wood);
+  border: 1px solid var(--chest-rim); border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+  color: var(--accent);
+  font-family: var(--font-mono); font-size: 15px; letter-spacing: 6px;
+  text-indent: 6px;                 /* offset the trailing letter-space gap */
+  transform-origin: 50% 100%;
+  transition: transform .5s cubic-bezier(.3, 1.4, .5, 1);
+  backface-visibility: hidden;      /* no mirrored text mid-rotation */
+}
+.chest-lining {
+  width: 100%; height: 6px;
+  background: var(--chest-wood);
+  transition: background-color .3s var(--ease-out), height .4s var(--ease-out);
+}
+.chest-base {
+  width: 100%; height: 46px;
+  background: var(--chest-base);
+  border: 1px solid var(--chest-rim); border-top: 0;
+  border-radius: 0 0 4px 4px;
+}
+.chest-label {
+  margin-top: 14px;
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 3px;
+  color: var(--bone);
+  transition: color .3s var(--ease-out);
+}
+.chest:hover .chest-lid,
+.chest:focus-visible .chest-lid { transform: rotateX(62deg) translateY(-6px); }
+.chest:hover .chest-lining,
+.chest:focus-visible .chest-lining { background: var(--accent); height: 14px; }
+.chest:hover .chest-label,
+.chest:focus-visible .chest-label { color: var(--accent); }
+.chest:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 4px; }
+
+/* Social rails ------------------------------------------------------------- */
+.socials {
+  display: flex; flex-direction: column; gap: 10px;
+  width: min(260px, 100%);
+  margin: 0; padding: 0; list-style: none;
+}
+.social-link {
+  position: relative;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 46px; padding: 0 16px;
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  border-radius: 4px;
+  color: var(--bone);
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 2.5px;
+  text-decoration: none;
+  overflow: hidden;
+  /* The wipe: an accent gradient anchored bottom-left, grown from 0 to full
+     width. Cheaper than a pseudo-element scale because background-size does
+     not dirty layout. */
+  background: linear-gradient(var(--accent), var(--accent)) no-repeat left 0 / 0% 100%;
+  transition: background-size .35s var(--ease-out), color .35s var(--ease-out),
+              border-color .35s var(--ease-out);
+}
+.social-link:hover,
+.social-link:focus-visible {
+  background-size: 100% 100%;
+  color: var(--ink);
+  border-color: var(--accent);
+}
+.social-arrow { transition: transform .35s var(--ease-out); }
+.social-link:hover .social-arrow,
+.social-link:focus-visible .social-arrow { transform: translate(3px, -3px); }
+.social-handle { font-size: 11px; letter-spacing: 1px; opacity: .7; margin-left: 8px; }
 
 .btn-ghost {
   justify-self: start;
@@ -593,26 +685,7 @@ html.has-box-btn .contact-form .btn-ghost { display: none; }
   min-height: 1.2em; color: var(--accent);
   font-family: var(--font-body); font-size: var(--step-0);
 }
-.btn-magnetic {
-  display: inline-grid; place-items: center; gap: .3rem;
-  width: clamp(10rem, 15vw, 11.5rem); aspect-ratio: 1;
-  border: 1px solid var(--rule); border-radius: 50%;
-  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
-  letter-spacing: .12em; text-transform: uppercase;
-  text-align: center;
-  transition: background-color .45s var(--ease-out), color .45s, border-color .45s;
-  will-change: transform;
-}
-.btn-magnetic:hover, .btn-magnetic:focus-visible { background: var(--accent); color: var(--ink); border-color: var(--accent); }
-.socials { display: flex; flex-wrap: wrap; gap: 1.4rem; margin-top: clamp(1.6rem, 4vh, 2.4rem); }
-.social-link {
-  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
-  letter-spacing: .12em; text-transform: uppercase; color: var(--ash);
-  display: inline-flex; gap: .5rem; will-change: transform;
-  transition: color .3s, transform .4s var(--ease-out);
-}
-.social-link:hover { color: var(--accent); transform: translateX(.3rem); }
-.social-handle { color: var(--ash); opacity: .75; }
+
 
 /* 16 · END ------------------------------------------------------------------------------------- */
 .panel-end .panel-inner { display: flex; flex-direction: column; justify-content: flex-end; min-height: 100vh; }
@@ -709,7 +782,20 @@ html.has-box-btn .contact-form .btn-ghost { display: none; }
   #loader { transition: none !important; }
   html.is-ready #loader { transform: none !important; }
   .is-poster-only #sceneLayer .scene { animation: none !important; }
-  .card, .skill-card, .card-cta::after, .social-link, .btn-ghost, .btn-magnetic { transition: none !important; }
+  .card, .skill-card, .card-cta::after, .social-link, .btn-ghost { transition: none !important; }
+  /* The chest opens by rotating the lid in 3D and the rails wipe in via an
+     animated background-size. Both are decorative motion, so reduced motion
+     gets the closed chest and the accent border instead of either effect. */
+  .chest-lid, .chest-lining, .chest-label, .social-arrow { transition: none !important; }
+  .chest:hover .chest-lid, .chest:focus-visible .chest-lid { transform: none !important; }
+  .chest:hover .chest-lining, .chest:focus-visible .chest-lining {
+    background: var(--accent); height: 14px;
+  }
+  .chest:hover .chest-label, .chest:focus-visible .chest-label { color: var(--accent); }
+  .social-link:hover, .social-link:focus-visible {
+    background-size: 100% 100% !important;
+    color: var(--ink); border-color: var(--accent);
+  }
   .card:hover, .skill-card:hover, .card:focus-within { transform: none; }
   .mask-inner { transform: none !important; }
   
