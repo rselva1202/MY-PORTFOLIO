@@ -92,6 +92,25 @@ html.is-ready #loader { transform: translate3d(0, -101%, 0); opacity: 0; visibil
      without adding a plate or changing the scrim. */
   --shadow-video: 0 2px 28px rgba(0, 0, 0, 0.35);
 
+  /* ---- BUTTON SYSTEM (.btn-gold) ---------------------------------------------
+     ONE definition for every button and button-like link on the site. Change a
+     value here and the whole set moves together — there are no per-button
+     overrides anywhere else in this file.
+
+     These are deliberately their own variables rather than reusing --accent:
+     --accent is animated per scene by GSAP (gold on most scenes, ice on S3),
+     so a button resting on it would flicker colour as the user scrolls. The
+     button gold is fixed. */
+  --btn-gold: #d9a441;
+  --btn-border: #5a4630;
+  --btn-text: #e8dcc8;
+  --btn-dark: #1a1511;
+  /* Backing for buttons that sit directly on video, so the label keeps its
+     contrast without a heavy plate. */
+  --btn-backing: rgba(15, 11, 8, .55);
+  --btn-blur: 6px;
+  --btn-dur: 350ms;
+
   --gutter: clamp(1.25rem, 4vw, 4rem);
   --nav-h: 4.25rem;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -155,12 +174,103 @@ em { font-style: italic; }
 .accent-dot { color: var(--accent); }
 .skip-link {
   position: fixed; top: 0.75rem; left: 0.75rem; z-index: 300;
-  padding: 0.6rem 1rem; background: var(--accent); color: var(--ink);
-  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
-  letter-spacing: 0.12em; text-transform: uppercase;
   transform: translateY(-300%); transition: transform 0.25s var(--ease-out);
 }
 .skip-link:focus-visible { transform: translateY(0); }
+
+/* ==========================================================================
+   BUTTON SYSTEM · .btn-gold
+   --------------------------------------------------------------------------
+   The single source of truth for every button and button-like link on the
+   site. Markup carries `.btn-gold` (plus at most one variant class); all the
+   visual weight lives here, so a colour or duration change is a one-line edit
+   in :root and nothing else.
+
+   Variants:
+     .btn-gold--compact  38px / 11px — nav, small links, in-card CTAs
+     .btn-gold--icon     46px square, centred, no arrow
+   Modifiers:
+     .btn-gold--flush    drop the text backdrop (use on solid panels)
+     .btn-gold--soon     disabled look: 50% opacity, no hover response
+
+   Hover is wrapped in @media (hover: hover) so touch devices never get a
+   stuck-on state; taps get :active feedback instead.
+   ========================================================================== */
+.btn-gold {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: space-between;
+  gap: 1rem;
+  height: 46px; padding: 0 16px;
+  border: 1px solid var(--btn-border);
+  border-radius: 4px;
+  background-color: var(--btn-backing);
+  -webkit-backdrop-filter: blur(var(--btn-blur));
+  backdrop-filter: blur(var(--btn-blur));
+  color: var(--btn-text);
+  font-family: var(--font-body);
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  /* The wipe: a flat gold layer anchored bottom-left, grown from zero width.
+     background-size animates without dirtying layout, which matters because
+     several of these sit inside cards that are already animating. */
+  background-image: linear-gradient(var(--btn-gold), var(--btn-gold));
+  background-repeat: no-repeat;
+  background-position: left 0;
+  background-size: 0% 100%;
+  transition: background-size var(--btn-dur) var(--ease-out),
+              color var(--btn-dur) var(--ease-out),
+              border-color var(--btn-dur) var(--ease-out),
+              transform 120ms var(--ease-out);
+}
+/* The label and the arrow are separate so only the arrow moves on hover. */
+.btn-gold > * { position: relative; }
+.btn-gold-arrow {
+  display: inline-block; flex: none;
+  transition: transform var(--btn-dur) var(--ease-out);
+}
+.btn-gold:focus-visible {
+  outline: 2px solid var(--btn-gold); outline-offset: 3px;
+}
+.btn-gold:active { transform: scale(.98); }
+.btn-gold[disabled],
+.btn-gold[aria-disabled="true"] {
+  opacity: .5; cursor: not-allowed; pointer-events: none;
+}
+
+/* Variant · COMPACT — nav, small links, in-card CTAs */
+.btn-gold--compact { height: 38px; padding: 0 12px; font-size: 11px; letter-spacing: 2px; gap: .75rem; }
+
+/* Variant · ICON-ONLY — 46px square, no arrow, for a lone control */
+.btn-gold--icon { width: 46px; padding: 0; justify-content: center; }
+
+/* Modifier · FLUSH — no text backing; for buttons already on a solid panel
+   (form, overlay, footer) where the scrim would only muddy the edge. */
+.btn-gold--flush { background-color: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* Modifier · SOON — the "Links coming soon" state on a card with no link.
+   Reads as unavailable at a glance and never responds to hover. */
+.btn-gold--soon { opacity: .5; pointer-events: none; }
+
+@media (hover: hover) {
+  .btn-gold:hover,
+  .btn-gold:focus-visible {
+    background-size: 100% 100%;
+    color: var(--btn-dark);
+    border-color: var(--btn-gold);
+  }
+  .btn-gold:hover .btn-gold-arrow,
+  .btn-gold:focus-visible .btn-gold-arrow { transform: translate(3px, -3px); }
+}
+/* Touch: no hover to leave stuck on, so the tap itself carries the feedback. */
+@media not all and (hover: hover) {
+  .btn-gold:active {
+    background-size: 100% 100%;
+    color: var(--btn-dark); border-color: var(--btn-gold);
+  }
+}
 
 /* Headings sit directly on video. A soft drop shadow keeps their edges legible
    over the bright snow and sky scenes without adding a plate or touching the
@@ -315,17 +425,10 @@ html.cursor-ready.is-text-field #starCursor { opacity: 0; }
   filter: drop-shadow(0 1px 6px rgba(0, 0, 0, .55));
 }
 .nav-right { display: flex; align-items: center; gap: clamp(.9rem, 2vw, 2rem); }
-.nav-link {
-  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
-  letter-spacing: .12em; text-transform: uppercase;
-  position: relative; padding-block: .35rem;
-}
-.nav-link::after {
-  content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 1px;
-  background: var(--accent); transform: scaleX(0); transform-origin: right;
-  transition: transform .45s var(--ease-out);
-}
-.nav-link:hover::after, .nav-link:focus-visible::after { transform: scaleX(1); transform-origin: left; }
+/* Nav links carry .btn-gold--compact; only the flex-safe wrapper and the
+   magnetic affordance hook live here. The old underline sweep is gone —
+   .btn-gold's gold wipe replaces it. */
+.nav-link { position: relative; }
 .nav-clock {
   font-family: var(--font-mono); font-size: .66rem; letter-spacing: .18em; color: var(--ash);
   font-variant-numeric: tabular-nums; padding-left: clamp(.6rem, 1.4vw, 1.3rem);
@@ -489,16 +592,10 @@ main { position: relative; z-index: 3; }
 }
 .card:hover .card-tag, .card:focus-within .card-tag { color: var(--bone); border-color: rgba(237,233,224,.3); }
 
-.card-cta {
-  margin-top: auto; padding-top: .6rem;    /* pinned to the bottom edge */
-  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
-  letter-spacing: .12em; text-transform: uppercase;
-  position: relative; width: fit-content;
-}
-.card-cta::after { content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: right; transition: transform .5s var(--ease-out); }
-.card:hover .card-cta:not(.card-cta--soon)::after, .card:focus-within .card-cta:not(.card-cta--soon)::after { transform: scaleX(1); transform-origin: left; }
-/* No link yet — stated quietly instead of faking an affordance. */
-.card-cta--soon { color: #6f6b65; letter-spacing: .1em; }
+/* The CTA is a .btn-gold--compact box; these two lines only pin it to the
+   bottom of the card. The old underline sweep and the .card-cta--soon colour
+   are gone — .btn-gold--soon now carries the unavailable state. */
+.card-cta { margin-top: auto; padding-top: .6rem; }
 
 /* 12 · ABOUT ---------------------------------------------------------------------------- */
 .about-split { display: flex; justify-content: flex-end; }
@@ -551,6 +648,9 @@ main { position: relative; z-index: 3; }
 
 /* 15 · CONTACT -------------------------------------------------------------------------------- */
 .contact-form { display: grid; gap: 1rem; margin: clamp(1.6rem, 4vh, 2.6rem) 0; max-width: 34rem; }
+/* The submit is a grid item and would stretch to the full column. Keep it
+   shrink-wrapped to its label. */
+.contact-form .btn-gold { justify-self: start; }
 .field { display: grid; gap: .4rem; }
 .field input, .field textarea {
   font-family: var(--font-body); font-size: var(--fs-copy); color: var(--bone);
@@ -643,44 +743,11 @@ main { position: relative; z-index: 3; }
   width: min(260px, 100%);
   margin: 0; padding: 0; list-style: none;
 }
-.social-link {
-  position: relative;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 46px; padding: 0 16px;
-  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
-  border-radius: 4px;
-  color: var(--bone);
-  font-family: var(--font-mono); font-size: 12px; letter-spacing: 2.5px;
-  text-decoration: none;
-  overflow: hidden;
-  /* The wipe: an accent gradient anchored bottom-left, grown from 0 to full
-     width. Cheaper than a pseudo-element scale because background-size does
-     not dirty layout. */
-  background: linear-gradient(var(--accent), var(--accent)) no-repeat left 0 / 0% 100%;
-  transition: background-size .35s var(--ease-out), color .35s var(--ease-out),
-              border-color .35s var(--ease-out);
-}
-.social-link:hover,
-.social-link:focus-visible {
-  background-size: 100% 100%;
-  color: var(--ink);
-  border-color: var(--accent);
-}
-.social-arrow { transition: transform .35s var(--ease-out); }
-.social-link:hover .social-arrow,
-.social-link:focus-visible .social-arrow { transform: translate(3px, -3px); }
+/* The rails themselves are styled entirely by .btn-gold (see the BUTTON
+   SYSTEM block above). Only the list wrapper and the Telegram handle, which
+   are not button concerns, live here. */
 .social-handle { font-size: 11px; letter-spacing: 1px; opacity: .7; margin-left: 8px; }
 
-.btn-ghost {
-  justify-self: start;
-  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
-  letter-spacing: .12em; text-transform: uppercase;
-  border: 1px solid var(--accent); color: var(--accent);
-  padding: .85rem 1.4rem; border-radius: 999px;
-  transition: background-color .35s, color .35s;
-  will-change: transform;
-}
-.btn-ghost:hover, .btn-ghost:focus-visible { background: var(--accent); color: var(--ink); }
 .form-status {
   min-height: 1.2em; color: var(--accent);
   font-family: var(--font-body); font-size: var(--step-0);
@@ -712,21 +779,13 @@ main { position: relative; z-index: 3; }
   padding: 1.4rem 0 0; margin-top: clamp(2.5rem, 8vh, 5rem); border-top: 1px solid var(--rule);
 }
 
-.foot-link { color: var(--ash); will-change: transform; transition: color .3s; }
-.foot-link:hover, .foot-link:focus-visible { color: var(--accent); }
+.foot-link { will-change: transform; }
 
 /* 17 · CASE OVERLAY ------------------------------------------------------------------------------- */
 #caseOverlay { position: fixed; inset: 0; z-index: 220; }
 .case-backdrop { position: absolute; inset: 0; background: rgba(11,8,6,.97); opacity: 0; }
 .case-scroll { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; padding: clamp(1.2rem,4vh,3rem) clamp(1.2rem,5vw,4rem) 4rem; }
-.case-close {
-  position: fixed; top: 1.4rem; right: clamp(1.2rem,5vw,4rem); z-index: 5;
-  font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600;
-  letter-spacing: .12em; text-transform: uppercase;
-  border: 1px solid var(--rule); border-radius: 999px; padding: .7rem 1.1rem;
-  transition: border-color .3s, color .3s, background-color .3s;
-}
-.case-close:hover, .case-close:focus-visible { border-color: var(--accent); color: var(--ink); background: var(--accent); }
+.case-close { position: fixed; top: 1.4rem; right: clamp(1.2rem,5vw,4rem); z-index: 5; }
 .case-media { position: relative; height: 52vh; min-height: 300px; margin-top: .5rem; }
 .case-media-box { position: absolute; inset: 0; overflow: hidden; will-change: transform; transform-origin: top left; }
 .case-media-box img { width: 100%; height: 100%; object-fit: cover; }
@@ -737,9 +796,8 @@ main { position: relative; z-index: 3; }
 .case-cell dt { margin-bottom: .7rem; }
 .case-cell dd { font-family: var(--font-body); font-size: var(--fs-copy); line-height: 1.65; color: rgba(237, 233, 224, 0.88); }
 .case-cell dd#caseStack { font-family: var(--font-mono); font-size: .76rem; letter-spacing: .12em; color: var(--ash); line-height: 2; }
+/* Layout only — the two links are .btn-gold--compact boxes. */
 .case-links { display: flex; gap: 2.4rem; margin-top: 3rem; border-top: 1px solid var(--rule); padding-top: 2rem; }
-.case-links a { font-family: var(--font-body); font-size: var(--fs-ui); font-weight: 600; letter-spacing: .12em; text-transform: uppercase; border-bottom: 1px solid var(--ash); padding-bottom: .35rem; transition: color .3s, border-color .3s; }
-.case-links a:hover { color: var(--accent); border-color: var(--accent); }
 
 /* 18 · A11Y ------------------------------------------------------------------------------------------- */
 :focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
@@ -782,20 +840,23 @@ main { position: relative; z-index: 3; }
   #loader { transition: none !important; }
   html.is-ready #loader { transform: none !important; }
   .is-poster-only #sceneLayer .scene { animation: none !important; }
-  .card, .skill-card, .card-cta::after, .social-link, .btn-ghost { transition: none !important; }
-  /* The chest opens by rotating the lid in 3D and the rails wipe in via an
-     animated background-size. Both are decorative motion, so reduced motion
-     gets the closed chest and the accent border instead of either effect. */
-  .chest-lid, .chest-lining, .chest-label, .social-arrow { transition: none !important; }
+  .card, .skill-card, .btn-gold { transition: none !important; }
+  /* .btn-gold: no wipe, no arrow slide, no press scale — the hover state is
+     applied outright so the colour swap survives as a plain state change. */
+  .btn-gold:hover, .btn-gold:focus-visible {
+    background-size: 100% 100% !important;
+    color: var(--btn-dark); border-color: var(--btn-gold);
+  }
+  .btn-gold:hover .btn-gold-arrow, .btn-gold:focus-visible .btn-gold-arrow { transform: none !important; }
+  .btn-gold:active { transform: none !important; }
+  /* The chest opens by rotating the lid in 3D. That is decorative motion, so
+     reduced motion gets the closed chest and the accent border instead. */
+  .chest-lid, .chest-lining, .chest-label { transition: none !important; }
   .chest:hover .chest-lid, .chest:focus-visible .chest-lid { transform: none !important; }
   .chest:hover .chest-lining, .chest:focus-visible .chest-lining {
     background: var(--accent); height: 14px;
   }
   .chest:hover .chest-label, .chest:focus-visible .chest-label { color: var(--accent); }
-  .social-link:hover, .social-link:focus-visible {
-    background-size: 100% 100% !important;
-    color: var(--ink); border-color: var(--accent);
-  }
   .card:hover, .skill-card:hover, .card:focus-within { transform: none; }
   .mask-inner { transform: none !important; }
   

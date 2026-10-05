@@ -102,7 +102,7 @@ Listed least- to most-capable: .ico for anything without SVG favicon support,
     }, 7000);
   </script>
 
-  <a class="skip-link" href="#work">Skip to selected work</a>
+  <a class="skip-link btn-gold btn-gold--compact" href="#work">Skip to selected work</a>
 
   <!-- 01 · FILM GRAIN -->
   <div class="grain" aria-hidden="true"></div>
@@ -135,11 +135,11 @@ Listed least- to most-capable: .ico for anything without SVG favicon support,
   <header id="siteNav">
     <nav class="nav-inner" aria-label="Primary"><a href="#home" class="nav-brand" data-magnetic data-cursor="link" aria-label="Selvanapathy R — home"><img class="nav-logo" src="assets/logo.png" alt="" width="317" height="418" decoding="async"></a>
       <div class="nav-right">
-          <a class="nav-link" href="#work" data-cursor="link">WORK</a>
-          <a class="nav-link" href="#about" data-cursor="link">ABOUT</a>
-          <a class="nav-link" href="#skills" data-cursor="link">SKILLS</a>
-          <a class="nav-link" href="#reviews" data-cursor="link">REVIEWS</a>
-          <a class="nav-link" href="#contact" data-cursor="link">CONTACT</a>
+          <a class="nav-link btn-gold btn-gold--compact" href="#work" data-cursor="link">WORK</a>
+          <a class="nav-link btn-gold btn-gold--compact" href="#about" data-cursor="link">ABOUT</a>
+          <a class="nav-link btn-gold btn-gold--compact" href="#skills" data-cursor="link">SKILLS</a>
+          <a class="nav-link btn-gold btn-gold--compact" href="#reviews" data-cursor="link">REVIEWS</a>
+          <a class="nav-link btn-gold btn-gold--compact" href="#contact" data-cursor="link">CONTACT</a>
         <span class="nav-clock" id="navClock" role="timer" aria-label="Local time">--:--</span>
       </div>
     </nav>
@@ -168,7 +168,7 @@ Listed least- to most-capable: .ico for anything without SVG favicon support,
           <p class="lead-sub mono-micro">REACT — NODE — THREE.JS</p>
         </div>
         <div class="panel-foot">
-          <button class="scroll-cue" id="scrollCue" aria-label="Scroll to selected work">
+          <button class="scroll-cue btn-gold btn-gold--compact" id="scrollCue" aria-label="Scroll to selected work">
             <span class="mono-micro">SCROLL</span><span class="cue-line" aria-hidden="true"></span>
           </button>
         </div>
@@ -238,7 +238,7 @@ Listed least- to most-capable: .ico for anything without SVG favicon support,
               <label class="mono-micro" for="cMsg">PROJECT</label>
               <textarea id="cMsg" name="message" rows="3" placeholder="A few lines about the work"></textarea>
             </div>
-            <button class="btn-ghost" type="submit" data-magnetic data-cursor="link">SEND MESSAGE <span aria-hidden="true">→</span></button>
+            <button class="btn-gold btn-gold--flush" type="submit" data-magnetic data-cursor="link">SEND MESSAGE <span class="btn-gold-arrow" aria-hidden="true">→</span></button>
             <p class="form-status" id="formStatus" role="status"></p>
           </form>
 
@@ -246,7 +246,16 @@ Listed least- to most-capable: .ico for anything without SVG favicon support,
                tilts open on hover to reveal the gold lining; each social rail
                wipes its accent in from the left. Both are CSS-only, so they
                degrade to plain bordered links without JS and are switched off
-               under prefers-reduced-motion (see §20). -->
+               under prefers-reduced-motion (see §20).
+
+               >>> HERO BUTTON — CARVED-BOX VIDEO BUTTON GOES HERE <<<
+               The chest below is the current EMAIL ME hero and is deliberately
+               EXEMPT from .btn-gold (Step 4): it keeps its own .chest rules in
+               §13b of style.css and must not pick up the shared button styling.
+               To swap in the carved-box video version, replace the <a> below
+               with the owner's video markup, keep id="emailBtn" (main.js
+               syncIdentity() sets its href from CONFIG.email), and leave
+               .contact-actions / .socials untouched. Do NOT add .btn-gold here. -->
           <div class="contact-actions">
             <a id="emailBtn" class="chest" data-cursor="link" href="mailto:rselva1204@gmail.com">
               <span class="chest-lid" aria-hidden="true">ᚠ ᚢ ᚦ</span>
@@ -269,7 +278,7 @@ Listed least- to most-capable: .ico for anything without SVG favicon support,
         </p>
         <footer id="siteFoot">
           <span class="mono-micro" id="footCopy">© 2026 SELVAGANAPATHY R.</span>
-          <button class="foot-link mono-micro" id="backTop" data-magnetic data-cursor="link">BACK TO TOP <span aria-hidden="true">↑</span></button>
+          <button class="foot-link btn-gold btn-gold--compact btn-gold--flush mono-micro" id="backTop" data-magnetic data-cursor="link">BACK TO TOP <span class="btn-gold-arrow" aria-hidden="true">↑</span></button>
         </footer>
       </div>
     </section>
@@ -279,7 +288,7 @@ Listed least- to most-capable: .ico for anything without SVG favicon support,
   <div id="caseOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="caseTitle">
     <div class="case-backdrop" id="caseBackdrop"></div>
     <div class="case-scroll" id="caseScroll" data-lenis-prevent>
-      <button class="case-close" id="caseClose" data-cursor="link">CLOSE <span aria-hidden="true">×</span></button>
+      <button class="case-close btn-gold btn-gold--compact btn-gold--flush" id="caseClose" data-cursor="link">CLOSE <span class="btn-gold-arrow" aria-hidden="true">×</span></button>
       <div class="case-media"><div class="case-media-box" id="caseMediaBox"><img id="caseImg" alt="" decoding="async" /></div></div>
       <div class="case-body" id="caseBody">
         <span class="mono-micro case-index" id="caseIndex">01</span>
@@ -291,8 +300,8 @@ Listed least- to most-capable: .ico for anything without SVG favicon support,
           <div class="case-cell"><dt class="mono-micro">OUTCOME</dt><dd id="caseOutcome"></dd></div>
         </dl>
         <div class="case-links">
-          <a id="caseLinkLive" target="_blank" rel="noopener" data-cursor="link">VISIT LIVE <span aria-hidden="true">↗</span></a>
-          <a id="caseLinkRepo" target="_blank" rel="noopener" data-cursor="link">SOURCE <span aria-hidden="true">↗</span></a>
+          <a id="caseLinkLive" class="btn-gold btn-gold--compact btn-gold--flush" target="_blank" rel="noopener" data-cursor="link">VISIT LIVE <span class="btn-gold-arrow" aria-hidden="true">↗</span></a>
+          <a id="caseLinkRepo" class="btn-gold btn-gold--compact btn-gold--flush" target="_blank" rel="noopener" data-cursor="link">SOURCE <span class="btn-gold-arrow" aria-hidden="true">↗</span></a>
         </div>
       </div>
     </div>

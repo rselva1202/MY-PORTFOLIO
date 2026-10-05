@@ -251,8 +251,8 @@
       // With a link the whole card is the anchor (new tab, no referrer leak).
       // Without one it is inert and says so, rather than pretending to be a link.
       const cta = p.link
-        ? `<span class="card-cta">VIEW LIVE <span aria-hidden="true">↗</span></span>`
-        : `<span class="card-cta card-cta--soon">Links coming soon</span>`;
+        ? `<span class="card-cta btn-gold btn-gold--compact btn-gold--flush">VIEW LIVE <span class="btn-gold-arrow" aria-hidden="true">↗</span></span>`
+        : `<span class="card-cta btn-gold btn-gold--compact btn-gold--flush btn-gold--soon">Links coming soon</span>`;
 
       const inner =
         `  <span class="card-num" aria-hidden="true">${pad2(i + 1)}</span>` +
@@ -412,9 +412,9 @@
     const ul = document.getElementById('socials');
     CONFIG.socials.forEach((s) => {
       const li = document.createElement('li');
-      li.innerHTML = `<a class="social-link" data-cursor="link" href="${s.url}" target="_blank" rel="noopener noreferrer">` +
+      li.innerHTML = `<a class="social-link btn-gold" data-cursor="link" href="${s.url}" target="_blank" rel="noopener noreferrer">` +
         `<span>${s.label}${s.handle ? ' <span class="social-handle">' + s.handle + '</span>' : ''}</span>` +
-        `<span class="social-arrow" aria-hidden="true">↗</span></a>`;
+        `<span class="btn-gold-arrow" aria-hidden="true">↗</span></a>`;
       ul.appendChild(li);
     });
   }
